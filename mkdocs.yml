@@ -1,0 +1,10 @@
+site_name: ngTangle documentation
+site_url: http://ng-tangle.monomelodies.nl/
+repo_url: https://github.com/monomelodies/ng-tangle
+
+pages:
+- Home:
+    - 'Overview': 'index.md'
+
+copyright: Copyright &copy; 2016, <a href="http://monomelodies.nl/">Marijn Ophorst</a>
+
