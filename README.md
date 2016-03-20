@@ -95,7 +95,22 @@ user logging out you could simply use her user ID (which would be empty or 0
 if no longer authenticated). You can usually set such a header in a central
 place in your application.
 
-Note that the 
+Note that this usage of "ETag" differs from "normal" HTTP caching in that it
+doesn't describe the state of the _URI_ but rather of the entire application.
+How that state is computed is of course up to the implementor.
+
+Internally `ngTangle` uses the `tangleFlush` event to trigger cache flushes, so
+you can also call this manually (e.g. when using Web sockets and something is
+known to have changed on a certain page). Either fire the event with no
+parameters to clear the entire cache (quick and dirty) or optionally specify a
+particular URI or an array of URIs to clear specifically. Again, these URIs must
+include sheme/hostname.
+
+It should also be noted that the `tangle-submit` directive _updates_ the cache
+for the URI being submitted to, so in many cases the flush will happen
+implicitly. It is mostly relevant if something alters the global application
+state.
+
 ## Todos
 This is just a quick and dirty first version. For future development:
 - Make the handler smarter in what it extracts/replaces. It now just loops
