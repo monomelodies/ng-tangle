@@ -40,6 +40,13 @@ angular.module('ngTangle', ['ngRoute'])
             $http.get(window.location.href, {cache: cache, headers: {'x-requested-with': 'xmlhttprequest'}}).then(tangleResponse.handle);
         });
         $rootScope.ngTangle = {loading: false};
+        $rootScope.$on('tangleFlush', function (event, url) {
+            if (url) {
+                cache.remove(url);
+            } else {
+                cache.removeAll();
+            }
+        });
     }])
 
     /**
@@ -63,7 +70,8 @@ angular.module('ngTangle', ['ngRoute'])
     /**
      * Add underwater submits for forms marked with submit directive.
      */
-    .directive('tangleSubmit', ['$http', '$rootScope', 'tangleResponse', function ($http, $rootScope, tangleResponse) {
+    .directive('tangleSubmit', ['$http', '$rootScope', 'tangleResponse', '$cacheFactory', function ($http, $rootScope, tangleResponse, $cacheFactory) {
+        var cache = $cacheFactory.get('tangleTemplate');
         return {
             restrict: 'A',
             link: function (scope, elem, attrs) {
@@ -86,12 +94,18 @@ angular.module('ngTangle', ['ngRoute'])
                         }
                     }
                     if (method == 'post') {
-                        $http.post(target, data).then(tangleResponse.handle);
+                        $http.post(target, data).then(function (response) {
+                            tangleResponse.handle(response);
+                            cache.put(target, response.data);
+                        });
                     } else {
                         if (target.indexOf('?') == -1) {
                             data = '?' + data.substring(1);
                         }
-                        $http.get(target + data).then(tangleResponse.handle);
+                        $http.get(target + data).then(function (response) {
+                            tangleResponse.handle(response);
+                            cache.put(target + data, response.data);
+                        });
                     }
                     return false;
                 });
