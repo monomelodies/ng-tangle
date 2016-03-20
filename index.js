@@ -31,7 +31,7 @@ angular.module('ngTangle', ['ngRoute'])
      * Watch the $routeChangeSuccess event and get new content accordingly.
      */
     .run(['$http', '$rootScope', '$cacheFactory', 'tangleResponse', function ($http, $rootScope, $cacheFactory, tangleResponse) {
-        let cache = $cacheFactory('tangleTemplate');
+        var cache = $cacheFactory('tangleTemplate');
         $rootScope.$on('$routeChangeSuccess', function () {
             if (initial) {
                 initial = false;
