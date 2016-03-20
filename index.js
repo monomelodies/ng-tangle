@@ -42,7 +42,11 @@ angular.module('ngTangle', ['ngRoute'])
         $rootScope.ngTangle = {loading: false};
         $rootScope.$on('tangleFlush', function (event, url) {
             if (url) {
-                cache.remove(url);
+                if (angular.isArray(url)) {
+                    angular.forEach(cache.remove);
+                } else {
+                    cache.remove(url);
+                }
             } else {
                 cache.removeAll();
             }
@@ -61,6 +65,12 @@ angular.module('ngTangle', ['ngRoute'])
                 } else {
                     window.location.href = headers['tangle-target'];
                 }
+            }
+            if (headers['tangle-etag']) {
+                if ($rootScope.ngTangle.etag && $rootScope.ngTangle.etag != headers['tangle-etag']) {
+                    $rootScope.$broadcast('tangleFlush');
+                }
+                $rootScope.ngTangle.etag = headers['tangle-etag'];
             }
             var received = angular.element(response.data);
             $rootScope.$broadcast('tangleTemplate', received);
@@ -119,8 +129,9 @@ angular.module('ngTangle', ['ngRoute'])
      */
     .directive('tangleTemplate', ['$rootScope', '$compile', function ($rootScope, $compile) {
         return {
-           restrict: 'A',
+            restrict: 'A',
             link: function (scope, elem, attrs) {
+                var id = identifier(elem[0], attrs['class']);
                 $rootScope.$on('$routeChangeStart', function () {
                     if (!initial) {
                         $rootScope.ngTangle.loading = true;
@@ -129,22 +140,7 @@ angular.module('ngTangle', ['ngRoute'])
                 $rootScope.$on('tangleTemplate', function (event, parsed) {
                     $rootScope.ngTangle.loading = false;
                     angular.forEach(parsed, function (el) {
-                        if (!el.tagName) {
-                            return;
-                        }
-                        // Replace & recompile the content if:
-                        // - the tagname matches
-                        // - the classnames match (if specified)
-                        // - the id matches (if specified)
-                        if (el.tagName.toLowerCase() != elem[0].tagName.toLowerCase()) {
-                            return;
-                        }
-                        if (el.id && elem.attr('id') && el.id != elem.attr('id')) {
-                            return;
-                        }
-                        let c1 = el.className ? el.className.split(' ').sort(sort) : [];
-                        let c2 = attrs['class'] ? attrs['class'].split(' ').sort(sort) : [];
-                        if (!angular.equals(c1, c2)) {
+                        if (identifier(el, el.className) != id) {
                             return;
                         }
                         elem.html(el.innerHTML);
@@ -157,7 +153,21 @@ angular.module('ngTangle', ['ngRoute'])
         };
     }]);
 
-function sort(a, b) {
-    return a < b ? -1 : 1;
+function identifier(element, className) {
+    if (!element.tagName) {
+        return false;
+    }
+    var id = element.tagName.toLowerCase();
+    if (element.id) {
+        id += '#' + element.id;
+    }
+    if (className) {
+        className.split(' ').sort(function (a, b) {
+            return a < b ? -1 : 1;
+        }).map(function (className) {
+            id += '.' + className;
+        });
+    }
+    return id;
 }
 
