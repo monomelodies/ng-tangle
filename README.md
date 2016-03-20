@@ -57,6 +57,31 @@ Forms not tagged with the directive are handled "the usual" way, i.e. either a
 full page refresh or an `ng-submit` handler (or some other handler if you're
 feeling particularly masochistic).
 
+## Handling redirects
+If any page requests a redirect (by issuing one of the 3xx HTTP headers),
+Angular's `$http` service follows it verbatim (and this is a browser feature,
+not an Angular-issue). While `ngTangle` correctly updates your content with the
+output from the redirect, we would also like the URL in the address bar to
+change.
+
+To accomplish this, `ngTangle` looks for a `"Tangle-Target"` header in the
+response. This header should contain the full URI (including scheme/hostname) of
+the page being rendered. If this URI differs from the one just set by `ngRoute`,
+`ngTangle` will update it for you.
+
+How to send custom headers depends on your server setup. E.g. in PHP you would
+write something like this:
+
+```php
+<?php
+
+header("Tangle-Target: http://example.com/the/full/path/");
+```
+
+The target header is recommended but optional. If you omit it, Tangle simply
+won't "redirect". Note that this may cause weird behaviour, e.g. when you
+declare forms with `action=""` and the form now points at the wrong URL.
+
 ## Flushing the HTTP cache
 For efficiency `ngTangle` caches all `$http.get` calls for templates using
 Angular's built-in `$cacheFactory`. However, there are many cases where you want
