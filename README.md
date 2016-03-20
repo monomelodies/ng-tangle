@@ -57,6 +57,20 @@ Forms not tagged with the directive are handled "the usual" way, i.e. either a
 full page refresh or an `ng-submit` handler (or some other handler if you're
 feeling particularly masochistic).
 
+## Flushing the HTTP cache
+For efficiency `ngTangle` caches all `$http.get` calls for templates using
+Angular's built-in `$cacheFactory`. However, there are many cases where you want
+to explicitly "flush" this cache (or parts of it). For instance when a logged in
+user has just logged out and menu options need to be hidden. For this purpose
+you can send a custom header called `"tangle-etag"`.
+
+This header can contain any string, but the important thing is it should
+represent the "state" of the entire application. I.e., for our example of the
+user logging out you could simply use her user ID (which would be empty or 0
+if no longer authenticated). You can usually set such a header in a central
+place in your application.
+
+Note that the 
 ## Todos
 This is just a quick and dirty first version. For future development:
 - Make the handler smarter in what it extracts/replaces. It now just loops
