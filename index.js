@@ -112,7 +112,7 @@ angular.module('ngTangle', ['ngRoute'])
                         $rootScope.ngTangle.loading = true;
                     }
                 });
-                $rootScope.$on('tangleTemplate', function (event, parsed, originalRequest) {
+                $rootScope.$on('tangleTemplate', function (event, parsed) {
                     $rootScope.ngTangle.loading = false;
                     angular.forEach(parsed, function (el) {
                         if (!el.tagName) {
