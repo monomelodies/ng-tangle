@@ -128,8 +128,8 @@ angular.module('ngTangle', ['ngRoute'])
                         if (el.id && elem.attr('id') && el.id != elem.attr('id')) {
                             return;
                         }
-                        let c1 = el.className.split(' ').sort(sort);
-                        let c2 = elem[0].className.split(' ').sort(sort);
+                        let c1 = el.className ? el.className.split(' ').sort(sort) : [];
+                        let c2 = attrs['class'] ? attrs['class'].split(' ').sort(sort) : [];
                         if (!angular.equals(c1, c2)) {
                             return;
                         }
