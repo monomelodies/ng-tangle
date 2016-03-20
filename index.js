@@ -61,7 +61,7 @@ angular.module('ngTangle', ['ngRoute'])
                 } else {
                     window.location.href = headers['tangle-target'];
                 }
-            }                    
+            }
             var received = angular.element(response.data);
             $rootScope.$broadcast('tangleTemplate', received);
         };
