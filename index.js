@@ -143,6 +143,7 @@ angular.module('ngTangle', ['ngRoute'])
                         if (identifier(el, el.className) != id) {
                             return;
                         }
+                        scope.$broadcast('$destroy');
                         elem.html(el.innerHTML);
                         if (elem[0].tagName.toLowerCase() != 'title') {
                             $compile(elem.contents())(scope);
