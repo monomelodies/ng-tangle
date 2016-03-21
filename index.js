@@ -140,13 +140,12 @@ angular.module('ngTangle', ['ngRoute'])
                 $rootScope.$on('tangleTemplate', function (event, parsed) {
                     $rootScope.ngTangle.loading = false;
                     angular.forEach(parsed, function (el) {
-                        if (identifier(el, el.className) != id) {
-                            return;
-                        }
-                        scope.$broadcast('$destroy');
-                        elem.html(el.innerHTML);
-                        if (elem[0].tagName.toLowerCase() != 'title') {
-                            $compile(elem.contents())(scope);
+                        if (identifier(el, el.className) == id || (el.querySelector && (el = el.querySelector(id)))) {
+                            scope.$broadcast('$destroy');
+                            elem.html(el.innerHTML);
+                            if (elem[0].tagName.toLowerCase() != 'title') {
+                                $compile(elem.contents())(scope);
+                            }
                         }
                     });
                 });
