@@ -1,6 +1,6 @@
 {
   "name": "ng-tangle",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Entangle Angular with server side code",
   "main": "index.js",
   "scripts": {
