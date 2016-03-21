@@ -82,6 +82,35 @@ The target header is recommended but optional. If you omit it, Tangle simply
 won't "redirect". Note that this may cause weird behaviour, e.g. when you
 declare forms with `action=""` and the form now points at the wrong URL.
 
+## Flushing the HTTP cache
+For efficiency `ngTangle` caches all `$http.get` calls for templates using
+Angular's built-in `$cacheFactory`. However, there are many cases where you want
+to explicitly "flush" this cache (or parts of it). For instance when a logged in
+user has just logged out and menu options need to be hidden. For this purpose
+you can send a custom header called `"tangle-etag"`.
+
+This header can contain any string, but the important thing is it should
+represent the "state" of the entire application. I.e., for our example of the
+user logging out you could simply use her user ID (which would be empty or 0
+if no longer authenticated). You can usually set such a header in a central
+place in your application.
+
+Note that this usage of "ETag" differs from "normal" HTTP caching in that it
+doesn't describe the state of the _URI_ but rather of the entire application.
+How that state is computed is of course up to the implementor.
+
+Internally `ngTangle` uses the `tangleFlush` event to trigger cache flushes, so
+you can also call this manually (e.g. when using Web sockets and something is
+known to have changed on a certain page). Either fire the event with no
+parameters to clear the entire cache (quick and dirty) or optionally specify a
+particular URI or an array of URIs to clear specifically. Again, these URIs must
+include sheme/hostname.
+
+It should also be noted that the `tangle-submit` directive _updates_ the cache
+for the URI being submitted to, so in many cases the flush will happen
+implicitly. It is mostly relevant if something alters the global application
+state.
+
 ## Todos
 This is just a quick and dirty first version. For future development:
 - Make the handler smarter in what it extracts/replaces. It now just loops
