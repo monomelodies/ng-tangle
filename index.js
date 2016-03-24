@@ -33,6 +33,9 @@ angular.module('ngTangle', ['ngRoute'])
     .run(['$http', '$rootScope', '$cacheFactory', 'tangleResponse', function ($http, $rootScope, $cacheFactory, tangleResponse) {
         var cache = $cacheFactory('tangleTemplate');
         $rootScope.$on('$routeChangeSuccess', function () {
+            $rootScope.$broadcast('tangleLoad');
+        });
+        $rootScope.$on('tangleLoad', function () {
             if (initial) {
                 initial = false;
                 return;
@@ -40,15 +43,24 @@ angular.module('ngTangle', ['ngRoute'])
             $http.get(window.location.href, {cache: cache, headers: {'x-requested-with': 'xmlhttprequest'}}).then(tangleResponse.handle);
         });
         $rootScope.ngTangle = {loading: false};
+
+        function uncache(url) {
+            cache.remove(url);
+            if (('' + window.location.href).match(url)) {
+                $rootScope.$broadcast('tangleLoad');
+            }
+        };
+
         $rootScope.$on('tangleFlush', function (event, url) {
             if (url) {
                 if (angular.isArray(url)) {
-                    angular.forEach(cache.remove);
+                    angular.forEach(url, uncache);
                 } else {
-                    cache.remove(url);
+                    uncache(url);
                 }
             } else {
                 cache.removeAll();
+                $rootScope.$broadcast('tangleLoad');
             }
         });
     }])
@@ -79,49 +91,58 @@ angular.module('ngTangle', ['ngRoute'])
 
     /**
      * Add underwater submits for forms marked with submit directive.
+     * `tangle-submit` can optionally contain an expression to run after
+     * successfull submission (like `ng-submit`).
      */
-    .directive('tangleSubmit', ['$http', '$rootScope', 'tangleResponse', '$cacheFactory', function ($http, $rootScope, tangleResponse, $cacheFactory) {
-        var cache = $cacheFactory.get('tangleTemplate');
-        return {
-            restrict: 'A',
-            link: function (scope, elem, attrs) {
-                elem.bind('submit', function (event) {
-                    event.preventDefault();
-                    var method = elem.attr('method').toLowerCase();
-                    var inputs = elem[0].querySelectorAll('input, select, textarea');
-                    var target = elem.attr('action') && elem.attr('action').length ?
-                        elem.attr('action') :
-                        window.location.href;
-                    var data = method == 'post' ? {} : '';
-                    for (var i = 0; i < inputs.length; i++) {
-                        if (inputs[i].disabled) {
-                            continue;
+    .directive(
+        'tangleSubmit',
+        ['$http', '$rootScope', 'tangleResponse', '$cacheFactory', '$parse', function ($http, $rootScope, tangleResponse, $cacheFactory, $parse) {
+            var cache = $cacheFactory.get('tangleTemplate');
+            return {
+                restrict: 'A',
+                link: function (scope, elem, attrs) {
+                    var submitHandler = $parse(attrs.tangleSubmit);
+                    elem.bind('submit', function (event) {
+                        event.preventDefault();
+                        $rootScope.ngTangle.loading = true;
+                        var method = elem.attr('method').toLowerCase();
+                        var inputs = elem[0].querySelectorAll('input, select, textarea');
+                        var target = elem.attr('action') && elem.attr('action').length ?
+                            elem.attr('action') :
+                            window.location.href;
+                        var data = method == 'post' ? {} : '';
+                        for (var i = 0; i < inputs.length; i++) {
+                            if (inputs[i].disabled) {
+                                continue;
+                            }
+                            if (method == 'post') {
+                                data[inputs[i].name] = inputs[i].value;
+                            } else {
+                                data += '&' + inputs[i].name + '=' + encodeURIComponent(inputs[i].value);
+                            }
                         }
                         if (method == 'post') {
-                            data[inputs[i].name] = inputs[i].value;
+                            $http.post(target, data).then(function (response) {
+                                tangleResponse.handle(response);
+                                cache.put(target, response.data);
+                                submitHandler(scope);
+                            });
                         } else {
-                            data += '&' + inputs[i].name + '=' + encodeURIComponent(inputs[i].value);
+                            if (target.indexOf('?') == -1) {
+                                data = '?' + data.substring(1);
+                            }
+                            $http.get(target + data).then(function (response) {
+                                tangleResponse.handle(response);
+                                cache.put(target + data, response.data);
+                                submitHandler(scope);
+                            });
                         }
-                    }
-                    if (method == 'post') {
-                        $http.post(target, data).then(function (response) {
-                            tangleResponse.handle(response);
-                            cache.put(target, response.data);
-                        });
-                    } else {
-                        if (target.indexOf('?') == -1) {
-                            data = '?' + data.substring(1);
-                        }
-                        $http.get(target + data).then(function (response) {
-                            tangleResponse.handle(response);
-                            cache.put(target + data, response.data);
-                        });
-                    }
-                    return false;
-                });
-            }
-        };
-    }])
+                        return false;
+                    });
+                }
+            };
+        }]
+    )
 
     /**
      * The tangle-template directive. This marks the element as "to watch" for
