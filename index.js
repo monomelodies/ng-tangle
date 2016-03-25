@@ -110,21 +110,23 @@ angular.module('ngTangle', ['ngRoute'])
                         var target = elem.attr('action') && elem.attr('action').length ?
                             elem.attr('action') :
                             window.location.href;
-                        var data = method == 'post' ? {} : '';
+                        var data = '';
                         for (var i = 0; i < inputs.length; i++) {
                             if (inputs[i].disabled) {
                                 continue;
                             }
-                            if (method == 'post') {
-                                data[inputs[i].name] = inputs[i].value;
-                            } else {
-                                data += '&' + inputs[i].name + '=' + encodeURIComponent(inputs[i].value);
+                            if (inputs[i].tagName.toLowerCase() == 'input'
+                                && ['checkbox', 'radio'].indexOf(inputs[i].type.toLowerCase()) != -1
+                                && !inputs[i].checked
+                            ) {
+                                continue;
                             }
+                            data += '&' + inputs[i].name + '=' + encodeURIComponent(inputs[i].value);
                         }
                         if (method == 'post') {
-                            $http.post(target, data).then(function (response) {
+                            $http.post(target, data.substring(1)).then(function (response) {
                                 tangleResponse.handle(response);
-                                cache.put(target, response.data);
+                                cache.remove(target);
                                 submitHandler(scope);
                             });
                         } else {
@@ -133,7 +135,7 @@ angular.module('ngTangle', ['ngRoute'])
                             }
                             $http.get(target + data).then(function (response) {
                                 tangleResponse.handle(response);
-                                cache.put(target + data, response.data);
+                                cache.remove(target + data);
                                 submitHandler(scope);
                             });
                         }
