@@ -104,6 +104,7 @@ angular.module('ngTangle', ['ngRoute'])
                     var submitHandler = $parse(attrs.tangleSubmit);
                     elem.bind('submit', function (event) {
                         event.preventDefault();
+                        elem.addClass('ng-submitted');
                         if (elem.hasClass('ng-invalid')) {
                             return false;
                         }
@@ -128,6 +129,7 @@ angular.module('ngTangle', ['ngRoute'])
                         }
                         if (method == 'post') {
                             $http.post(target, data.substring(1)).then(function (response) {
+                                elem.removeClass('ng-submitted');
                                 tangleResponse.handle(response);
                                 cache.remove(target);
                                 submitHandler(scope);
@@ -137,6 +139,7 @@ angular.module('ngTangle', ['ngRoute'])
                                 data = '?' + data.substring(1);
                             }
                             $http.get(target + data).then(function (response) {
+                                elem.removeClass('ng-submitted');
                                 tangleResponse.handle(response);
                                 cache.remove(target + data);
                                 submitHandler(scope);
