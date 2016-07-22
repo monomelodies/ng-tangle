@@ -104,6 +104,9 @@ angular.module('ngTangle', ['ngRoute'])
                     var submitHandler = $parse(attrs.tangleSubmit);
                     elem.bind('submit', function (event) {
                         event.preventDefault();
+                        if (elem.hasClass('ng-invalid')) {
+                            return false;
+                        }
                         $rootScope.ngTangle.loading = true;
                         var method = elem.attr('method').toLowerCase();
                         var inputs = elem[0].querySelectorAll('input, select, textarea');
