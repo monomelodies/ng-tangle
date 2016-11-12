@@ -1,8 +1,6 @@
 
 "use strict";
 
-var initial = true;
-
 angular.module('ngTangle', ['ngRoute'])
 
     /**
@@ -32,17 +30,13 @@ angular.module('ngTangle', ['ngRoute'])
      */
     .run(['$http', '$rootScope', '$cacheFactory', 'tangleResponse', function ($http, $rootScope, $cacheFactory, tangleResponse) {
         var cache = $cacheFactory('tangleTemplate');
-        $rootScope.$on('$routeChangeSuccess', function () {
-            $rootScope.$broadcast('tangleLoad');
-        });
         $rootScope.$on('tangleLoad', function () {
-            if (initial) {
-                initial = false;
-                return;
-            }
             $http.get(window.location.href, {cache: cache, headers: {'x-requested-with': 'xmlhttprequest'}}).then(tangleResponse.handle);
         });
         $rootScope.ngTangle = {loading: false};
+        $rootScope.$on('$routeChangeSuccess', function () {
+            $rootScope.$broadcast('tangleLoad');
+        });
 
         function uncache(url) {
             cache.remove(url);
