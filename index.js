@@ -156,9 +156,7 @@ angular.module('ngTangle', ['ngRoute'])
             link: function (scope, elem, attrs) {
                 var id = identifier(elem[0], attrs['class']);
                 $rootScope.$on('$routeChangeStart', function () {
-                    if (!initial) {
-                        $rootScope.ngTangle.loading = true;
-                    }
+                    $rootScope.ngTangle.loading = true;
                 });
                 $rootScope.$on('tangleTemplate', function (event, parsed) {
                     $rootScope.ngTangle.loading = false;
