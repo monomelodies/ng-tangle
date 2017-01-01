@@ -53,6 +53,9 @@ Any form with the `tangle-submit` attribute will have its submission intercepted
 and performed via an XMLHttpRequest as well. The resulting page (presumably
 HTML) is subsequently fed to the `tangle-template` handler.
 
+On succesfull submission, the `'tangleSubmitted'` event is broadcasted to the
+`$rootScope`. You can watch this and e.g. show a notification.
+
 Forms not tagged with the directive are handled "the usual" way, i.e. either a
 full page refresh or an `ng-submit` handler (or some other handler if you're
 feeling particularly masochistic).
