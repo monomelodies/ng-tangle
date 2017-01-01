@@ -127,6 +127,7 @@ angular.module('ngTangle', ['ngRoute'])
                                 tangleResponse.handle(response);
                                 cache.remove(target);
                                 submitHandler(scope);
+                                $rootScope.$broadcast('tangleSubmitted');
                             });
                         } else {
                             if (target.indexOf('?') == -1) {
@@ -137,6 +138,7 @@ angular.module('ngTangle', ['ngRoute'])
                                 tangleResponse.handle(response);
                                 cache.remove(target + data);
                                 submitHandler(scope);
+                                $rootScope.$broadcast('tangleSubmitted');
                             });
                         }
                         return false;
