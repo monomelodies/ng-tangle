@@ -26,7 +26,7 @@ angular.module('ngTangle', ['ngRoute'])
     }])
 
     /**
-     * Watch the $routeChangeSuccess event and get new content accordingly.
+     * Watch the $locationChangeSuccess event and get new content accordingly.
      */
     .run(['$http', '$rootScope', '$cacheFactory', 'tangleResponse', function ($http, $rootScope, $cacheFactory, tangleResponse) {
         var cache = $cacheFactory('tangleTemplate');
@@ -35,7 +35,8 @@ angular.module('ngTangle', ['ngRoute'])
         });
         $rootScope.ngTangle = {loading: false};
         $rootScope.$on('$locationChangeSuccess', function (event, current, prev) {
-            if (prev) {
+            // Initial loads and mere hash changes shouldn't trigger this:
+            if (prev && prev.replace(/#.*?$/, '') != current.replace(/#.*?$/, '')) {
                 $rootScope.$broadcast('tangleLoad');
             }
         });
