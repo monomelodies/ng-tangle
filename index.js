@@ -34,7 +34,7 @@ angular.module('ngTangle', ['ngRoute'])
             $http.get(window.location.href, {cache: cache, headers: {'x-requested-with': 'xmlhttprequest'}}).then(tangleResponse.handle);
         });
         $rootScope.ngTangle = {loading: false};
-        $rootScope.$on('$routeChangeSuccess', function (event, current, prev) {
+        $rootScope.$on('$locationChangeSuccess', function (event, current, prev) {
             if (prev) {
                 $rootScope.$broadcast('tangleLoad');
             }
