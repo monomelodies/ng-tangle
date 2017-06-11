@@ -1,7 +1,6 @@
 
 "use strict";
 
-import 'angular-route';
 import html5mode from './html5mode';
 import defaultRouting from './defaultRouting';
 import Response from './Response';
