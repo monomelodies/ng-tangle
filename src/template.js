@@ -23,7 +23,7 @@ export default ['$rootScope', '$compile', ($rootScope, $compile) => ({
             });
         });
     }
-})]);
+})];
 
 function identifier(element, className) {
     if (!element.tagName) {
