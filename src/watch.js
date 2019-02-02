@@ -14,7 +14,7 @@ export default ['$http', '$rootScope', '$cacheFactory', 'tangleResponse', ($http
         // Initial loads and mere hash changes shouldn't trigger this:
         if (prev && prev.replace(/#.*?$/, '') != current.replace(/#.*?$/, '')) {
             $rootScope.$broadcast('tangleLoad');
-        } else if (!prev) {
+        } else {
             $rootScope.ngTangle.loading = false;
         }
     });
